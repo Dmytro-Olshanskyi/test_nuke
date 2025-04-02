@@ -1,0 +1,63 @@
+dotnet new console -n NukeTest
+cd NukeTest
+
+dotnet tool install Nuke.GlobalTool --global
+nuke :setup
+
+// Program.cs
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Hello, Nuke!");
+    }
+}
+
+// build/Build.cs
+using Nuke.Common;
+using Nuke.Common.CI;
+using Nuke.Common.ProjectModel;
+using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Utilities.Collections;
+
+class Build : NukeBuild
+{
+    public static int Main() => Execute<Build>(x => x.Compile);
+
+    [Solution] readonly Solution Solution;
+
+    Target Clean => _ => _
+        .Executes(() =>
+        {
+            DotNetTasks.DotNetClean(s => s
+                .SetProject(Solution));
+        });
+
+    Target Restore => _ => _
+        .DependsOn(Clean)
+        .Executes(() =>
+        {
+            DotNetTasks.DotNetRestore(s => s
+                .SetProjectFile(Solution));
+        });
+
+    Target Compile => _ => _
+        .DependsOn(Restore)
+        .Executes(() =>
+        {
+            DotNetTasks.DotNetBuild(s => s
+                .SetProjectFile(Solution)
+                .SetConfiguration("Release"));
+        });
+
+    Target Run => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            DotNetTasks.DotNetRun(s => s
+                .SetProjectFile(Solution));
+        });
+}
+
