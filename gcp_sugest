@@ -61,3 +61,6 @@ class Build : NukeBuild
         });
 }
 
+
+https://github.com/JetBrains/teamcity-docker-images/blob/master/dockerhub/teamcity-server/README.md
+
